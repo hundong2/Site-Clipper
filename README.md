@@ -8,8 +8,10 @@ URL을 공유하면 웹 콘텐츠를 NotebookLM에 최적화된 마크다운(.md
 
 ## 목차
 
+- [빠른 시작](#빠른-시작)
 - [아키텍처 개요](#아키텍처-개요)
 - [프로젝트 구조](#프로젝트-구조)
+- [Makefile 명령어](#makefile-명령어)
 - [Backend 설정 및 실행](#backend-설정-및-실행)
 - [Frontend 설정 및 실행](#frontend-설정-및-실행)
 - [Android 설정 및 빌드](#android-설정-및-빌드)
@@ -18,6 +20,40 @@ URL을 공유하면 웹 콘텐츠를 NotebookLM에 최적화된 마크다운(.md
 - [환경 변수](#환경-변수)
 - [Google Drive 연동 설정](#google-drive-연동-설정)
 - [라이선스](#라이선스)
+
+---
+
+## 빠른 시작
+
+### 사전 요구사항
+
+- Python 3.11+
+- Node.js 18+
+- make (macOS/Linux 기본 포함)
+
+### 설치 및 실행
+
+```bash
+# 1. 의존성 설치 (최초 1회)
+make install
+
+# 2. 개발 서버 실행 (backend + frontend 동시 실행)
+make dev
+```
+
+실행 후 브라우저에서 **http://localhost:5173** 접속.
+
+### 주요 명령어
+
+| 명령어 | 설명 |
+|--------|------|
+| `make install` | 모든 의존성 설치 |
+| `make dev` | Backend + Frontend 동시 실행 |
+| `make dev-backend` | Backend만 실행 |
+| `make dev-frontend` | Frontend만 실행 |
+| `make build` | Frontend 프로덕션 빌드 |
+| `make docker` | Docker로 Backend 실행 |
+| `make help` | 모든 명령어 보기 |
 
 ---
 
@@ -117,6 +153,7 @@ Site-Clipper/
 │                   ├── CookieWebViewScreen.kt    # 쿠키 로그인 WebView
 │                   └── ShareReceiverScreen.kt    # 메인 UI 화면
 │
+├── Makefile                          # 빌드/실행 자동화
 ├── PLAN.md                           # 개발 계획서
 ├── LICENSE                           # MIT 라이선스
 └── README.md                         # 이 문서
@@ -124,23 +161,81 @@ Site-Clipper/
 
 ---
 
+## Makefile 명령어
+
+프로젝트 루트에서 `make` 명령어로 빌드 및 실행을 자동화할 수 있다.
+
+### 설치
+
+```bash
+# 모든 의존성 설치 (backend + frontend)
+make install
+
+# 개별 설치
+make install-backend   # Python 의존성 + Playwright
+make install-frontend  # npm 의존성
+```
+
+### 개발
+
+```bash
+# Backend + Frontend 동시 실행 (권장)
+make dev
+
+# 개별 실행
+make dev-backend   # http://localhost:8000
+make dev-frontend  # http://localhost:5173
+```
+
+### 빌드 및 배포
+
+```bash
+# Frontend 프로덕션 빌드
+make build
+
+# Docker로 Backend 실행
+make docker
+make docker-down  # 중지
+```
+
+### 유틸리티
+
+```bash
+make clean   # 빌드 캐시 정리
+make health  # Backend 상태 확인
+make help    # 모든 명령어 보기
+```
+
+---
+
 ## Backend 설정 및 실행
+
+> **권장:** `make install-backend && make dev-backend` 사용
 
 ### 사전 요구사항
 
 - Docker 및 Docker Compose **또는**
 - Python 3.11+, pip
 
-### Docker로 실행 (권장)
+### Docker로 실행
 
 ```bash
-cd backend
-docker compose up --build
+make docker
+# 또는
+cd backend && docker compose up --build
 ```
 
 서버가 `http://localhost:8000`에서 시작된다.
 
 ### 로컬 개발 환경에서 실행
+
+```bash
+# Makefile 사용 (권장)
+make install-backend
+make dev-backend
+```
+
+수동 설치:
 
 ```bash
 cd backend
@@ -154,7 +249,6 @@ pip install -r requirements.txt
 
 # Playwright 브라우저 설치 (Crawl4AI가 사용)
 playwright install chromium
-playwright install-deps chromium
 
 # 서버 실행
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -171,6 +265,10 @@ curl http://localhost:8000/api/v1/health
 
 ## Frontend 설정 및 실행
 
+> **권장:** `make install-frontend && make dev-frontend` 사용
+>
+> 또는 Backend와 함께: `make install && make dev`
+
 ### 사전 요구사항
 
 - Node.js 18+
@@ -179,13 +277,20 @@ curl http://localhost:8000/api/v1/health
 ### 개발 서버 실행
 
 ```bash
+# Makefile 사용 (권장)
+make install-frontend
+make dev-frontend
+
+# Backend와 함께 실행
+make dev  # backend + frontend 동시 실행
+```
+
+수동 설치:
+
+```bash
 cd frontend
-
-# 의존성 설치
 npm install
-
-# 개발 서버 시작 (http://localhost:5173)
-npm run dev
+npm run dev  # http://localhost:5173
 ```
 
 개발 서버는 `/api` 요청을 `http://localhost:8000`으로 프록시한다. 백엔드가 먼저 실행 중이어야 한다.
@@ -193,8 +298,9 @@ npm run dev
 ### 프로덕션 빌드
 
 ```bash
-cd frontend
-npm run build
+make build
+# 또는
+cd frontend && npm run build
 ```
 
 빌드 결과물은 `frontend/dist/` 디렉터리에 생성된다.
