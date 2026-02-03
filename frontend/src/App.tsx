@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { submitCrawl, streamTask, getTask } from './api/client';
-import type { SseProgressEvent } from './api/types';
+import type { CrawlMode, SseProgressEvent } from './api/types';
 import styles from './App.module.css';
 
 type AppState =
@@ -13,7 +13,8 @@ type AppState =
 
 export default function App() {
   const [url, setUrl] = useState('');
-  const [sitemap, setSitemap] = useState(false);
+  const [mode, setMode] = useState<CrawlMode>('single');
+  const [maxPages, setMaxPages] = useState(50);
   const [state, setState] = useState<AppState>({ phase: 'idle' });
   const [viewRaw, setViewRaw] = useState(false);
 
@@ -23,7 +24,11 @@ export default function App() {
     setState({ phase: 'submitting' });
 
     try {
-      const { task_id } = await submitCrawl({ url: url.trim(), sitemap });
+      const { task_id } = await submitCrawl({
+        url: url.trim(),
+        mode,
+        max_pages: mode === 'smart' ? maxPages : undefined,
+      });
 
       setState({ phase: 'processing', taskId: task_id, progress: 0, totalPages: 0, processedPages: 0 });
 
@@ -68,12 +73,11 @@ export default function App() {
         },
       );
 
-      // cleanup stored but not used in MVP — browser handles on unmount
       void cleanup;
     } catch (err) {
       setState({ phase: 'error', message: err instanceof Error ? err.message : 'Request failed' });
     }
-  }, [url, sitemap]);
+  }, [url, mode, maxPages]);
 
   const handleDownload = useCallback(() => {
     if (state.phase !== 'completed') return;
@@ -92,7 +96,8 @@ export default function App() {
   const handleReset = useCallback(() => {
     setState({ phase: 'idle' });
     setUrl('');
-    setSitemap(false);
+    setMode('single');
+    setMaxPages(50);
     setViewRaw(false);
   }, []);
 
@@ -124,14 +129,61 @@ export default function App() {
                 Convert
               </button>
             </div>
-            <label className={styles.sitemapToggle}>
-              <input
-                type="checkbox"
-                checked={sitemap}
-                onChange={(e) => setSitemap(e.target.checked)}
-              />
-              Crawl entire sitemap
-            </label>
+
+            {/* Mode Selection */}
+            <div className={styles.modeSection}>
+              <label className={styles.modeLabel}>
+                <input
+                  type="radio"
+                  name="mode"
+                  value="single"
+                  checked={mode === 'single'}
+                  onChange={() => setMode('single')}
+                />
+                Single page
+              </label>
+              <label className={styles.modeLabel}>
+                <input
+                  type="radio"
+                  name="mode"
+                  value="sitemap"
+                  checked={mode === 'sitemap'}
+                  onChange={() => setMode('sitemap')}
+                />
+                Sitemap
+              </label>
+              <label className={styles.modeLabel}>
+                <input
+                  type="radio"
+                  name="mode"
+                  value="smart"
+                  checked={mode === 'smart'}
+                  onChange={() => setMode('smart')}
+                />
+                Smart (AI)
+              </label>
+            </div>
+
+            {/* Smart Mode Options */}
+            {mode === 'smart' && (
+              <div className={styles.smartOptions}>
+                <label className={styles.optionLabel}>
+                  Max pages:
+                  <input
+                    type="number"
+                    min={1}
+                    max={200}
+                    value={maxPages}
+                    onChange={(e) => setMaxPages(Number(e.target.value))}
+                    className={styles.numberInput}
+                  />
+                </label>
+                <p className={styles.smartHint}>
+                  AI will analyze navigation links (Next, Menu, TOC) to crawl documentation.
+                </p>
+              </div>
+            )}
+
             {state.phase === 'error' && (
               <p className={styles.errorText}>{state.message}</p>
             )}

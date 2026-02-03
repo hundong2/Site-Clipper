@@ -1,8 +1,15 @@
 export type TaskStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
+export type CrawlMode = 'single' | 'sitemap' | 'smart';
+
 export interface CrawlRequest {
   url: string;
-  sitemap: boolean;
+  mode: CrawlMode;
+  sitemap?: boolean;  // Legacy field
+  path_prefix?: string;
+  max_pages?: number;
+  gemini_api_key?: string;
+  gemini_model?: string;
 }
 
 export interface CrawlResponse {

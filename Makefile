@@ -1,4 +1,4 @@
-.PHONY: help install install-backend install-frontend dev dev-backend dev-frontend build build-frontend clean docker docker-up docker-down
+.PHONY: help install install-backend install-frontend dev dev-backend dev-frontend build build-frontend clean docker docker-up docker-down setup-env
 
 # Default target
 help:
@@ -8,6 +8,7 @@ help:
 	@echo "  make install          Install all dependencies (backend + frontend)"
 	@echo "  make install-backend  Install backend Python dependencies"
 	@echo "  make install-frontend Install frontend npm dependencies"
+	@echo "  make setup-env        Set up environment variables (GEMINI_API_KEY)"
 	@echo ""
 	@echo "Development:"
 	@echo "  make dev              Run backend and frontend in dev mode (parallel)"
@@ -105,3 +106,19 @@ clean:
 
 health:
 	@curl -s http://localhost:8000/api/v1/health | python3 -m json.tool || echo "Backend is not running"
+
+# =============================================================================
+# Environment Setup
+# =============================================================================
+
+setup-env:
+	@echo "Setting up environment variables..."
+	@if [ -z "$(GEMINI_API_KEY)" ]; then \
+		read -p "Enter your Gemini API key: " key; \
+		echo "GEMINI_API_KEY=$$key" > backend/.env; \
+	else \
+		echo "GEMINI_API_KEY=$(GEMINI_API_KEY)" > backend/.env; \
+	fi
+	@echo "✓ Environment file created at backend/.env"
+	@echo ""
+	@echo "Get your Gemini API key at: https://aistudio.google.com/app/apikey"

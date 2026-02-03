@@ -3,7 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/
+.venv/
+
+# Environment files (API keys, secrets)
 .env
+**/.env
 
 # Frontend
 frontend/node_modules/
@@ -21,10 +25,15 @@ android/local.properties
 .idea/
 *.iml
 .vscode/
+.claude/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Logs / temp
+*.log
+=*
 
 # Docker
 docker-compose.override.yml

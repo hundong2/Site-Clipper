@@ -1,0 +1,16 @@
+# Android SDK 경로 (시스템에 맞게 수정)
+# 이 파일을 local.properties로 복사한 뒤 경로를 수정하세요.
+# cp local.properties.example local.properties
+
+# macOS 예시
+sdk.dir=/Users/USERNAME/Library/Android/sdk
+
+# Windows 예시
+# sdk.dir=C:\\Users\\USERNAME\\AppData\\Local\\Android\\Sdk
+
+# Linux 예시
+# sdk.dir=/home/USERNAME/Android/Sdk
+
+# Google OAuth Client ID (Google Drive 업로드에 필요)
+# Google Cloud Console에서 발급받은 OAuth Client ID를 입력하세요.
+# GOOGLE_OAUTH_CLIENT_ID=YOUR_CLIENT_ID.apps.googleusercontent.com
