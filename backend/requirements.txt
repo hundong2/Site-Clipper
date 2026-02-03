@@ -1,0 +1,9 @@
+fastapi>=0.109.2
+uvicorn[standard]>=0.27.1
+crawl4ai==0.4.248
+pydantic>=2.10
+pydantic-settings>=2.1.0
+httpx>=0.27.0
+sse-starlette>=2.0.0
+google-api-python-client>=2.114.0
+google-auth-oauthlib>=1.2.0
